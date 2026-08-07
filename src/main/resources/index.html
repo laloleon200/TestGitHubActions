@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Portal de Pruebas Interno</title>
+</head>
+<body>
+    <h1 id="welcome-title">Bienvenido al Sistema</h1>
+    <form id="user-form">
+        <label for="username">Usuario:</label>
+        <input type="text" id="username" name="username">
+        <button type="button" id="submit-btn" onclick="mostrarSaludo()">Enviar</button>
+    </form>
+    <div id="result-message" style="margin-top: 10px;"></div>
+ 
+    <script>
+        function mostrarSaludo() {
+            const name = document.getElementById('username').value;
+            document.getElementById('result-message').innerText = 'Hola, ' + name + '! Registro exitoso.';
+        }
+    </script>
+</body>
+</html>
