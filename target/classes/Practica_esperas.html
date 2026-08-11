@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Laboratorio de Pruebas - Esperas en Selenium</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; background: #f4f4f9; color: #333; }
+        .card { background: #fff; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h2 { color: #0284c7; margin-top: 0; }
+        button { background: #0284c7; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-size: 14px; }
+        button:disabled { background: #cbd5e1; cursor: not-allowed; }
+        button:hover:not(:disabled) { background: #0369a1; }
+        input, select { padding: 8px; width: 250px; margin-right: 10px; border: 1px solid #cbd5e1; border-radius: 4px; }
+        .hidden { display: none !important; }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #ea580c; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; margin-left: 10px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .alert-success { background: #dcfce7; color: #15803d; padding: 10px; border-radius: 4px; margin-top: 10px; border: 1px solid #bbf7d0; }
+    </style>
+</head>
+<body>
+
+    <h1>Laboratorio Práctico: Manejo de Esperas y Asincronía</h1>
+    <p>Esta página simula retrasos de red, llamadas AJAX y elementos que cambian dinámicamente en el DOM.</p>
+
+    <!-- SECCIÓN 1: Botón con retraso de aparición -->
+    <div class="card">
+        <h2>1. Elemento con Retraso de Carga (DOM Delay)</h2>
+        <p>Este botón no existe en el DOM al cargar la página; aparece tras 3 segundos mediante JavaScript.</p>
+        <button id="btnCargaLenta" class="hidden">¡Aparecí tarde!</button>
+        <div id="mensajeCarga" class="alert-success hidden">¡Botón presionado correctamente tras la espera!</div>
+    </div>
+
+    <!-- SECCIÓN 2: Spinner / Loader AJAX -->
+    <div class="card">
+        <h2>2. Spinner de Carga AJAX (Invisibility Wait)</h2>
+        <p>Haz clic en procesar para simular una petición al servidor que tarda 2 segundos en responder.</p>
+        <button id="btnProcess" onclick="simularAjax()">Procesar Datos</button>
+        <div id="spinnerAjax" class="spinner hidden"></div>
+        <div id="resultadoAjax" class="alert-success hidden">¡Datos procesados con éxito en el servidor!</div>
+    </div>
+
+    <!-- SECCIÓN 3: Elemento dinámico / Cambio de Texto -->
+    <div class="card">
+        <h2>3. Cambio Dinámico de Estado y Texto</h2>
+        <label for="servicioSelect">Selecciona un servicio:</label>
+        <select id="servicioSelect" onchange="cambiarTextoUrgencia()">
+            <option value="">-- Elige una opción --</option>
+            <option value="consulta">Consulta General</option>
+            <option value="urgencias">Urgencia Médica</option>
+        </select>
+        <div id="avisoUrgencia" style="margin-top: 10px; font-weight: bold; color: #b45309;">Estado: Esperando selección...</div>
+    </div>
+
+    <script>
+        // Simula la aparición tardía del botón (3 segundos)
+        setTimeout(() => {
+            const btn = document.getElementById('btnCargaLenta');
+            btn.classList.remove('hidden');
+        }, 3000);
+
+        document.getElementById('btnCargaLenta').addEventListener('click', function() {
+            document.getElementById('mensajeCarga').classList.remove('hidden');
+        });
+
+        // Simula petición AJAX de 2 segundos
+        function simularAjax() {
+            const spinner = document.getElementById('spinnerAjax');
+            const resultado = document.getElementById('resultadoAjax');
+            const btn = document.getElementById('btnProcess');
+            
+            btn.disabled = true;
+            spinner.classList.remove('hidden');
+            resultado.classList.add('hidden');
+
+            setTimeout(() => {
+                spinner.classList.add('hidden');
+                resultado.classList.remove('hidden');
+                btn.disabled = false;
+            }, 2000);
+        }
+
+        // Simula cambio de texto asíncrono tras seleccionar un select
+        function cambiarTextoUrgencia() {
+            const val = document.getElementById('servicioSelect').value;
+            const aviso = document.getElementById('avisoUrgencia');
+            aviso.innerText = "Cargando configuración...";
+            
+            setTimeout(() => {
+                if(val === 'urgencias') {
+                    aviso.innerText = "urgencias";
+                } else if(val === 'consulta') {
+                    aviso.innerText = "consulta general activa";
+                } else {
+                    aviso.innerText = "Estado: Esperando selección...";
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

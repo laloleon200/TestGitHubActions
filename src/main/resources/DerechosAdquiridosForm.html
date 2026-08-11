@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo de Administración - Derechos Adquiridos de Finiquito</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --bg: #f5f6fa;
+            --card-bg: #ffffff;
+            --text: #333333;
+            --border: #dcdde1;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 5px;
+            font-size: 22px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 13px;
+            margin-bottom: 25px;
+        }
+
+        .section-box {
+            background: #fafafa;
+            border: 1px solid var(--border);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        h3 {
+            margin-top: 0;
+            color: var(--primary);
+            font-size: 16px;
+            border-bottom: 2px solid var(--secondary);
+            padding-bottom: 6px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        label {
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 5px;
+            color: var(--primary);
+        }
+
+        input[type="text"], select {
+            padding: 9px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 13px;
+            background: #fff;
+        }
+
+        input[type="text"]:focus, select:focus {
+            border-color: var(--secondary);
+            outline: none;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: normal;
+            cursor: pointer;
+            margin-top: 6px;
+        }
+
+        .btn-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        button {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .btn-primary { background-color: var(--secondary); color: white; }
+        .btn-success { background-color: var(--success); color: white; }
+        .btn-warning { background-color: var(--warning); color: white; }
+        .btn-danger { background-color: var(--danger); color: white; }
+
+        /* Mensajes de Alerta y Error */
+        #mensajeAlerta {
+            display: none;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            font-size: 14px;
+            text-align: center;
+        }
+        .alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert-error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+        /* Tabla de Consulta y Registros */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 13px;
+        }
+
+        th, td {
+            border: 1px solid var(--border);
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        tr:nth-child(even) { background-color: #fdfdfd; }
+
+        .action-links {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-links button {
+            padding: 5px 10px;
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Administración de Finiquitos - TecGurus</h1>
+    <div class="subtitle">Módulo de Configuración de Derechos Adquiridos y Destinos de Ahorro</div>
+
+    <!-- Alerta Global del Sistema -->
+    <div id="mensajeAlerta"></div>
+
+    <!-- Sección 1: Configuración de Derechos Adquiridos -->
+    <div class="section-box">
+        <h3>Configuración de Derechos Adquiridos</h3>
+        <input type="hidden" id="editIndex" value="-1">
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="selectServicio">Servicio:</label>
+                <select id="selectServicio">
+                    <option value="Fondo de Ahorro">Fondo de Ahorro</option>
+                    <option value="Caja de Ahorro">Caja de Ahorro</option>
+                    <option value="Seguro de Vida">Seguro de Vida</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="selectMotivo">Motivo de Finiquito:</label>
+                <select id="selectMotivo">
+                    <option value="Despido Injustificado">Despido Injustificado</option>
+                    <option value="Renuncia Voluntaria">Renuncia Voluntaria</option>
+                    <option value="Jubilación">Jubilación</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="selectTipoAhorro">Tipo Ahorro:</label>
+                <select id="selectTipoAhorro">
+                    <option value="Ahorro Empleado">Ahorro Empleado</option>
+                    <option value="Ahorro Empresa">Ahorro Empresa</option>
+                    <option value="Todos">Todos</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="txtPorcentaje">Porcentaje (%):</label>
+                <input type="text" id="txtPorcentaje" placeholder="Ej. 80">
+            </div>
+            <div class="form-group">
+                <label for="txtAntiguedadMin">Antigüedad Mínima:</label>
+                <input type="text" id="txtAntiguedadMin" placeholder="Ej. 1 año">
+            </div>
+            <div class="form-group">
+                <label for="txtAntiguedadMax">Antigüedad Máxima:</label>
+                <input type="text" id="txtAntiguedadMax" placeholder="Ej. 3 años">
+            </div>
+        </div>
+        <div class="btn-container">
+            <button type="button" id="btnGuardarConfig" class="btn-primary" onclick="guardarConfiguracion()">Guardar Configuración</button>
+            <button type="button" class="btn-warning" onclick="limpiarFormularioConfig()">Limpiar</button>
+        </div>
+    </div>
+
+    <!-- Sección 2: Configuración de Destinos de Derechos Adquiridos -->
+    <div class="section-box">
+        <h3>Destinos de Derechos Adquiridos</h3>
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="selectDestino">Destino:</label>
+                <select id="selectDestino">
+                    <option value="Usuario">Usuario</option>
+                    <option value="Empresa">Empresa</option>
+                    <option value="Fondo de Retiro">Fondo de Retiro</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="selectFormaPago">Forma de Pago:</label>
+                <select id="selectFormaPago">
+                    <option value="Transferencia">Transferencia</option>
+                    <option value="Cheque">Cheque</option>
+                    <option value="Efectivo">Efectivo</option>
+                </select>
+            </div>
+            <div class="form-group full-width">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="checkDestinoDefault"> Destino Default (true/false)
+                </label>
+            </div>
+        </div>
+        <div class="btn-container">
+            <button type="button" id="btnGuardarDestino" class="btn-success" onclick="guardarDestino()">Guardar Destino</button>
+        </div>
+    </div>
+
+    <!-- Sección 3: Consulta de Registros (Para pruebas de Edición y Eliminación) -->
+    <div class="section-box">
+        <h3>Consulta de Derechos Adquiridos Registrados</h3>
+        <table id="tablaConfiguraciones">
+            <thead>
+                <tr>
+                    <th>Servicio</th>
+                    <th>Motivo</th>
+                    <th>Tipo Ahorro</th>
+                    <th>%</th>
+                    <th>Mín - Máx</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Se llena dinámicamente con JS, precargando un registro inicial por defecto -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Sección 4: Consulta de Destinos Registrados -->
+    <div class="section-box">
+        <h3>Consulta de Destinos Registrados</h3>
+        <table id="tablaDestinos">
+            <thead>
+                <tr>
+                    <th>Destino</th>
+                    <th>Forma de Pago</th>
+                    <th>Default</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Se llena dinámicamente -->
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+    // Base de datos simulada en memoria
+    let configuraciones = [
+        {
+            servicio: "Fondo de Ahorro",
+            motivo: "Despido Injustificado",
+            tipoAhorro: "Ahorro Empleado",
+            porcentaje: "80",
+            antiguedadMin: "1 año",
+            antiguedadMax: "3 años",
+            activo: true // true = físico/lógico activo
+        }
+    ];
+
+    let destinos = [
+        {
+            destino: "Usuario",
+            formaPago: "Transferencia",
+            default: true
+        }
+    ];
+
+    window.onload = function() {
+        renderTablas();
+    };
+
+    function mostrarAlerta(texto, esError = false) {
+        const alerta = document.getElementById('mensajeAlerta');
+        alerta.innerText = texto;
+        alerta.className = esError ? "alert-error" : "alert-success";
+        alerta.style.display = "block";
+        setTimeout(() => {
+            alerta.style.display = "none";
+        }, 6000);
+    }
+
+    function renderTablas() {
+        // Render Configs
+        const tbodyConfig = document.querySelector('#tablaConfiguraciones tbody');
+        tbodyConfig.innerHTML = "";
+        configuraciones.forEach((c, index) => {
+            let tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${c.servicio}</td>
+                <td>${c.motivo}</td>
+                <td>${c.tipoAhorro}</td>
+                <td>${c.porcentaje}</td>
+                <td>${c.antiguedadMin} - ${c.antiguedadMax}</td>
+                <td>${c.activo ? 'Activo' : 'Eliminado'}</td>
+                <td>
+                    <div class="action-links">
+                        <button class="btn-primary" onclick="cargarEdicion(${index})">Editar</button>
+                        <button class="btn-danger" onclick="eliminarFisico(${index})">Eliminar Físico</button>
+                        <button class="btn-warning" onclick="eliminarLogico(${index})">Eliminar Lógico</button>
+                    </div>
+                </td>
+            `;
+            tbodyConfig.appendChild(tr);
+        });
+
+        // Render Destinos
+        const tbodyDestinos = document.querySelector('#tablaDestinos tbody');
+        tbodyDestinos.innerHTML = "";
+        destinos.forEach((d, index) => {
+            let tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${d.destino}</td>
+                <td>${d.formaPago}</td>
+                <td>${d.default ? 'true' : 'false'}</td>
+                <td>
+                    <div class="action-links">
+                        <button class="btn-primary" onclick="cargarEdicionDestino(${index})">Editar</button>
+                        <button class="btn-danger" onclick="eliminarDestino(${index})">Eliminar</button>
+                    </div>
+                </td>
+            `;
+            tbodyDestinos.appendChild(tr);
+        });
+    }
+
+    function guardarConfiguracion() {
+        const servicio = document.getElementById('selectServicio').value;
+        const motivo = document.getElementById('selectMotivo').value;
+        const tipoAhorro = document.getElementById('selectTipoAhorro').value;
+        const porcentaje = document.getElementById('txtPorcentaje').value.trim();
+        const antiguedadMin = document.getElementById('txtAntiguedadMin').value.trim();
+        const antiguedadMax = document.getElementById('txtAntiguedadMax').value.trim();
+        const editIndex = parseInt(document.getElementById('editIndex').value);
+
+        if (!porcentaje || !antiguedadMin || !antiguedadMax) {
+            mostrarAlerta("Por favor complete todos los campos obligatorios.", true);
+            return;
+        }
+
+        // Validaciones de negocio según User Stories
+        // 1. Validar Tipo Ahorro "Todos" vs específicos
+        let existeTodos = configuraciones.some(c => c.activo && c.servicio === servicio && c.motivo === motivo && c.tipoAhorro === "Todos" && (editIndex === -1 || configuraciones.indexOf(c) !== editIndex));
+        let existeEspecifico = configuraciones.some(c => c.activo && c.servicio === servicio && c.motivo === motivo && c.tipoAhorro !== "Todos" && (editIndex === -1 || configuraciones.indexOf(c) !== editIndex));
+
+        if (tipoAhorro === "Todos" && existeEspecifico) {
+            mostrarAlerta("El Servicio ya cuenta con una Configuración de Derechos Adquiridos a nivel Ahorro, favor de capturar otro", true);
+            return;
+        }
+
+        if (tipoAhorro !== "Todos" && existeTodos) {
+            mostrarAlerta("El Servicio ya cuenta con una Configuración de Derechos Adquiridos a nivel Servicio, favor de capturar otro", true);
+            return;
+        }
+
+        // 2. Validar solapamiento de periodos (Antigüedades) para mismo servicio/motivo/tipoAhorro
+        let duplicadoMismoPeriodo = configuraciones.some((c, idx) => {
+            if (!c.activo || idx === editIndex) return false;
+            if (c.servicio === servicio && c.motivo === motivo && (c.tipoAhorro === tipoAhorro || tipoAhorro === "Todos" || c.tipoAhorro === "Todos")) {
+                // Simplificación de solapamiento estricto para la HU
+                if (c.antiguedadMin === antiguedadMin && c.antiguedadMax === antiguedadMax) {
+                    return true;
+                }
+            }
+            return false;
+        });
+
+        if (duplicadoMismoPeriodo) {
+            mostrarAlerta("La Configuración de Derechos Adquiridos ya existe, favor de capturar otro", true);
+            return;
+        }
+
+        if (editIndex === -1) {
+            // Alta nueva
+            configuraciones.push({
+                servicio, motivo, tipoAhorro, porcentaje, antiguedadMin, antiguedadMax, activo: true
+            });
+            mostrarAlerta("La Configuración de Derechos Adquiridos se ha agregado exitosamente");
+        } else {
+            // Edición
+            configuraciones[editIndex] = {
+                servicio, motivo, tipoAhorro, porcentaje, antiguedadMin, antiguedadMax, activo: true
+            };
+            document.getElementById('editIndex').value = "-1";
+            mostrarAlerta("La Configuración de Derechos Adquiridos se ha actualizado exitosamente");
+        }
+
+        limpiarFormularioConfig();
+        renderTablas();
+    }
+
+    function cargarEdicion(index) {
+        const c = configuraciones[index];
+        document.getElementById('selectServicio').value = c.servicio;
+        document.getElementById('selectMotivo').value = c.motivo;
+        document.getElementById('selectTipoAhorro').value = c.tipoAhorro;
+        document.getElementById('txtPorcentaje').value = c.porcentaje;
+        document.getElementById('txtAntiguedadMin').value = c.antiguedadMin;
+        document.getElementById('txtAntiguedadMax').value = c.antiguedadMax;
+        document.getElementById('editIndex').value = index;
+    }
+
+    function limpiarFormularioConfig() {
+        document.getElementById('txtPorcentaje').value = "";
+        document.getElementById('txtAntiguedadMin').value = "";
+        document.getElementById('txtAntiguedadMax').value = "";
+        document.getElementById('editIndex').value = "-1";
+    }
+
+    function eliminarFisico(index) {
+        configuraciones.splice(index, 1);
+        renderTablas();
+        mostrarAlerta("La Configuración de Derechos Adquiridos se ha eliminado exitosamente");
+    }
+
+    function eliminarLogico(index) {
+        configuraciones[index].activo = false;
+        renderTablas();
+        mostrarAlerta("La Configuración de Derechos Adquiridos se ha eliminado exitosamente");
+    }
+
+    let editDestinoIndex = -1;
+
+    function guardarDestino() {
+        const destino = document.getElementById('selectDestino').value;
+        const formaPago = document.getElementById('selectFormaPago').value;
+        const esDefault = document.getElementById('checkDestinoDefault').checked;
+
+        // Validar Destino Default Único al editar o crear
+        if (!esDefault) {
+            let defaultsActivos = destinos.filter((d, idx) => d.default && idx !== editDestinoIndex);
+            if (defaultsActivos.length === 0) {
+                mostrarAlerta("La Configuración debe tener un Destino Default", true);
+                return;
+            }
+        }
+
+        // Validar duplicados de destino
+        let duplicado = destinos.some((d, idx) => idx !== editDestinoIndex && d.destino === destino && d.formaPago === formaPago);
+        if (duplicado) {
+            mostrarAlerta("El Destino ya existe, favor de capturar otro", true);
+            return;
+        }
+
+        if (editDestinoIndex === -1) {
+            destinos.push({ destino, formaPago, default: esDefault });
+            mostrarAlerta("El Destino se ha agregado exitosamente");
+        } else {
+            destinos[editDestinoIndex] = { destino, formaPago, default: esDefault };
+            editDestinoIndex = -1;
+            mostrarAlerta("El Destino se ha actualizado exitosamente");
+        }
+
+        document.getElementById('checkDestinoDefault').checked = false;
+        renderTablas();
+    }
+
+    function cargarEdicionDestino(index) {
+        const d = destinos[index];
+        document.getElementById('selectDestino').value = d.destino;
+        document.getElementById('selectFormaPago').value = d.formaPago;
+        document.getElementById('checkDestinoDefault').checked = d.default;
+        editDestinoIndex = index;
+    }
+
+    function eliminarDestino(index) {
+        destinos.splice(index, 1);
+        renderTablas();
+        mostrarAlerta("El Destino se ha eliminado exitosamente");
+    }
+</script>
+
+</body>
+</html>

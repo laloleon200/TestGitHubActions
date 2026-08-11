@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Inventario - Bodega Central</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #2c3e50;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .main-container {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            max-width: 700px;
+            margin: 0 auto;
+            border-top: 6px solid #e67e22;
+        }
+        h2 {
+            margin-top: 0;
+            color: #d35400;
+            text-align: center;
+        }
+        fieldset {
+            border: 1px solid #dcdde1;
+            border-radius: 6px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+        }
+        legend {
+            font-weight: bold;
+            color: #2c3e50;
+            background: #fef5e7;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 12px;
+        }
+        .form-group {
+            flex: 1;
+            margin-bottom: 12px;
+        }
+        .form-group.full {
+            width: 100%;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #34495e;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        input[type="text"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        textarea {
+            resize: vertical;
+            height: 60px;
+        }
+        .btn-acciones {
+            display: flex;
+            gap: 10px;
+        }
+        .btn-registrar, .btn-limpiar {
+            padding: 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        .btn-registrar {
+            background-color: #e67e22;
+            color: white;
+        }
+        .btn-registrar:hover {
+            background-color: #d35400;
+        }
+        .btn-limpiar {
+            background-color: #7f8c8d;
+            color: white;
+        }
+        .btn-limpiar:hover {
+            background-color: #626567;
+        }
+        #alerta-inventario {
+            margin-top: 15px;
+            color: #27ae60;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+        .error-msg {
+            color: #c0392b;
+            font-size: 12px;
+            margin-top: 4px;
+            display: none;
+        }
+        .char-counter {
+            font-size: 11px;
+            color: #7f8c8d;
+            text-align: right;
+            margin-top: 2px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <h2>Sistema de Control de Inventario</h2>
+        <form id="inventarioForm">
+
+            <!-- SECCIÓN 1: DATOS DEL ARTÍCULO -->
+            <fieldset>
+                <legend>Información General del Producto</legend>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="txtNombreProducto">Nombre del Producto: *</label>
+                        <input type="text" id="txtNombreProducto" placeholder="Ej. Taladro Inalámbrico" maxlength="40" oninput="actualizarContador()">
+                        <div id="errorProducto" class="error-msg">El nombre del producto es obligatorio.</div>
+                        <div class="char-counter"><span id="contadorChars">0</span>/40 caracteres</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Código SKU: *</label>
+                        <input type="text" class="input-sku" placeholder="Ej. HERM-001">
+                        <div id="errorSku" class="error-msg">El código SKU es obligatorio.</div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Categoría:</label>
+                        <!-- Selector avanzado XPath usará este data-testid -->
+                        <select name="categoria" data-testid="select-categoria">
+                            <option value="herramientas">Herramientas</option>
+                            <option value="construccion">Construcción</option>
+                            <option value="electricidad">Electricidad</option>
+                            <option value="jardineria">Jardinería</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Cantidad en Stock: *</label>
+                        <input type="number" id="inputCantidad" class="input-cantidad" min="1" max="5000" value="10">
+                        <div id="errorCantidad" class="error-msg">La cantidad debe ser mayor a 0.</div>
+                    </div>
+                </div>
+            </fieldset>
+
+            <!-- SECCIÓN 2: DETALLES DE ALMACENAMIENTO -->
+            <fieldset>
+                <legend>Ubicación y Proveedor</legend>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Pasillo de Almacén:</label>
+                        <select class="select-pasillo" id="selectPasillo" onchange="verificarPasilloEspecial()">
+                            <option value="pasillo-a">Pasillo A (Norte)</option>
+                            <option value="pasillo-b">Pasillo B (Sur)</option>
+                            <option value="pasillo-c">Pasillo C (Refrigerado)</option>
+                            <option value="zona-peligrosa">Zona de Materiales Peligrosos</option>
+                        </select>
+                        <div id="avisoPeligro" style="display: none; color: #c0392b; font-size: 12px; margin-top: 5px; font-weight: bold;">
+                            ¡Atención: Requiere equipo de protección especial (EPP)!
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Costo Unitario ($):</label>
+                        <input type="number" class="input-costo" step="0.01" min="0" value="50.00">
+                    </div>
+                </div>
+
+                <div class="form-group full">
+                    <label>Observaciones o Notas de Ingreso:</label>
+                    <textarea class="txt-observaciones" placeholder="Describa el estado de recepción de la mercancía..."></textarea>
+                </div>
+            </fieldset>
+
+            <div class="btn-acciones">
+                <button type="button" class="btn-limpiar" id="btnLimpiar" onclick="limpiarFormulario()">Limpiar</button>
+                <button type="button" class="btn-registrar" id="btnRegistrarStock" onclick="validarYRegistrar()">Registrar Stock</button>
+            </div>
+        </form>
+        <div id="alerta-inventario">¡Producto registrado exitosamente en el inventario!</div>
+    </div>
+
+    <script>
+        let clicksRegistro = 0;
+
+        function actualizarContador() {
+            let texto = document.getElementById('txtNombreProducto').value;
+            document.getElementById('contadorChars').innerText = texto.length;
+        }
+
+        function verificarPasilloEspecial() {
+            let pasillo = document.getElementById('selectPasillo').value;
+            let aviso = document.getElementById('avisoPeligro');
+            if (pasillo === 'zona-peligrosa') {
+                aviso.style.display = 'block';
+            } else {
+                aviso.style.display = 'none';
+            }
+        }
+
+        function limpiarFormulario() {
+            document.getElementById('inventarioForm').reset();
+            document.getElementById('contadorChars').innerText = '0';
+            document.getElementById('alerta-inventario').style.display = 'none';
+            document.getElementById('avisoPeligro').style.display = 'none';
+            clicksRegistro = 0;
+            document.getElementById('btnRegistrarStock').disabled = false;
+        }
+
+        function validarYRegistrar() {
+            clicksRegistro++;
+            let btn = document.getElementById('btnRegistrarStock');
+            
+            if (clicksRegistro > 1) {
+                btn.disabled = true;
+                return;
+            }
+
+            let producto = document.getElementById('txtNombreProducto').value.trim();
+            let sku = document.querySelector('.input-sku').value.trim();
+            let cantidad = document.getElementById('inputCantidad').value;
+            let hayError = false;
+
+            document.getElementById('errorProducto').style.display = producto === "" ? 'block' : 'none';
+            if (producto === "") hayError = true;
+
+            document.getElementById('errorSku').style.display = sku === "" ? 'block' : 'none';
+            if (sku === "") hayError = true;
+
+            document.getElementById('errorCantidad').style.display = (cantidad === "" || parseInt(cantidad) <= 0) ? 'block' : 'none';
+            if (cantidad === "" || parseInt(cantidad) <= 0) hayError = true;
+
+            if (!hayError) {
+                document.getElementById('alerta-inventario').style.display = 'block';
+            } else {
+                document.getElementById('alerta-inventario').style.display = 'none';
+                clicksRegistro = 0;
+            }
+        }
+    </script>
+
+</body>
+</html>
