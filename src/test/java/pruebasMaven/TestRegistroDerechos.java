@@ -37,7 +37,7 @@ class TestRegistroDerechos {
     @BeforeEach
     public void setUp() {
     	ChromeOptions chromeOpts = new ChromeOptions();
-        //chromeOpts.addArguments("--headless=new");
+        chromeOpts.addArguments("--headless=new");
         driver = new ChromeDriver(chromeOpts);
         
         driver.manage().window().maximize();
